@@ -86,7 +86,6 @@ class Canvas {
    * Redraw blank canvas with background objects in it
    */
   clear(){
-    console.log("I was called!");
     //Clear
     this.ctx.beginPath();
     this.ctx.fillStyle = this.backgroundColor;
@@ -131,6 +130,7 @@ class Controller{
 class KeyboardController extends Controller{
   constructor(args){
     super(args);
+    this.oldSkoolMode = false;
     //Ancient method of listening for keystrokes
     document.onkeypress = (e)=>{
       e = e || window.event;
@@ -145,6 +145,15 @@ class KeyboardController extends Controller{
         if(charCode == 115){ //'s'
           this.direction = 1;
           this.timestamp = Date.now();
+        }
+        //Check for oldSkool mode
+        if(charCode == 32){
+          this.oldSkoolMode = !this.oldSkoolMode;
+          if(this.oldSkoolMode){
+            document.getElementById("title").innerHTML = "OldSkoolPong";
+          }else{
+            document.getElementById("title").innerHTML = "LeapPong";
+          }
         }
       }
     };
@@ -249,6 +258,7 @@ class Pong {
   constructor(canvas){
     this.framerate       = 20;   //The frame rate we want to run at
     this.inPlay          = true; //Fun Fact this is never false you can never ever stop >:3 //TODO Add pause button
+    this.oldSkoolMode    = false; //Enable OldSkool controls
     
     //All the fun Score objects (hint the left will win if its a cheating computer unless you are a god)
     this.leftScore       = document.getElementById("leftScore");
@@ -273,7 +283,7 @@ class Pong {
     //The Cheating Computer's Paddle
     this.leftPaddle      = new Paddle({x:10,
                                        y:(canvas.height/2)-50,
-                                       speed: 2,
+                                       speed: 4,
                                        totalH: this.canvas.height,
                                        color:"rgba(0,0,0,1)"
                            });
@@ -281,7 +291,7 @@ class Pong {
     //The Human's Paddle
     this.rightPaddle     = new Paddle({x:canvas.width-20,
                                        y:(canvas.height/2)-50,
-                                       speed: 4,
+                                       speed: 6,
                                        totalH: this.canvas.height,
                                        color:"rgba(0,0,0,1)"
                            });
@@ -295,6 +305,8 @@ class Pong {
     //The Human using a Leap Motion //TODO Add option for old school players aka Keyboard
     this.rightController = new LeapController({sampleFreq: this.framerate});
     
+    //For those who want to be old school
+    this.oldSkool = new KeyboardController({sampleFreq: 250});
     
     //The Master Game Loop (simple right)
     this.interval = setInterval(()=>{
@@ -313,11 +325,18 @@ class Pong {
     
     //Update Controller input
     this.leftController.intervalFunc(now);
+    this.oldSkool.intervalFunc(now);
     this.rightController.intervalFunc(now);
     
+    //Get oldSkool mode from Keyboard Controller
+    this.oldSkoolMode = this.oldSkool.oldSkoolMode; 
+      
     //Apply controller input to the Paddles
     this.leftPaddle.direction = this.leftController.direction;
-    this.rightPaddle.direction = this.rightController.direction;
+    if(this.oldSkoolMode)
+      this.rightPaddle.direction = this.oldSkool.direction;
+    else
+      this.rightPaddle.direction = this.rightController.direction;
     
     //Update the positions of the Round thing and the Paddles
     this.ball.timeStep();
@@ -371,13 +390,13 @@ class Pong {
       //bounce
       this.ball.vec.x = -this.ball.vec.x
       let yreflectmod = this.ball.y - (this.rightPaddle.y + this.rightPaddle.length/2);
-      if(yreflectmod > 2){ //Dumb angle calculation
-        yreflectmod = 2;
+      if(yreflectmod > 4){ //Dumb angle calculation
+        yreflectmod = 4;
       } 
-      if(yreflectmod < -2){
-        yreflectmod = -2;
+      if(yreflectmod < -4){
+        yreflectmod = -4;
       }
-      this.ball.vec.y = this.ball.vec.y + yreflectmod; 
+      this.ball.vec.y = this.ball.vec.y - yreflectmod; 
     }
     
     //Redraw the Beautiful Canvas (ITS ART I SWEAR)
