@@ -360,12 +360,13 @@ class Pong {
       this.ball.vec = {x:-5,y:0}
     }
     
-    if(this.ball.y < 0 + this.ball.rad){
+    var newVec = this.ball.vec;
+    if(this.ball.y < 0 + this.ball.rad && this.ball.vec.y < 0){
       //bounce mirror
       this.ball.vec.y = -this.ball.vec.y;
     }
     
-    if(this.ball.y > this.canvas.height - this.ball.rad){
+    if(this.ball.y > this.canvas.height - this.ball.rad && this.ball.vec.y > 0){
       //bounce mirror
       this.ball.vec.y = -this.ball.vec.y;
     }
@@ -382,7 +383,13 @@ class Pong {
       if(yreflectmod < -2){
         yreflectmod = -2;
       }
-      this.ball.vec.y = this.ball.vec.y + yreflectmod; 
+      this.ball.vec.y = this.ball.vec.y + yreflectmod;
+      
+      //Hack to fix one stuck location
+      if(this.ball.y < 0){
+        this.ball.x +=10;
+        this.ball.y +=10;
+      }
     }
     
     if((this.ball.x > this.rightPaddle.x - this.ball.rad) && 
