@@ -373,7 +373,8 @@ class Pong {
     
     //Handle Paddle Collisions
     if((this.ball.x < this.leftPaddle.x + this.leftPaddle.width + this.ball.rad) &&
-       (this.ball.y > this.leftPaddle.y && this.ball.y < this.leftPaddle.y + this.leftPaddle.length)){
+       (this.ball.y > this.leftPaddle.y && this.ball.y < this.leftPaddle.y + this.leftPaddle.length) &&
+       this.ball.vec.x < 1){
       //bounce
       this.ball.vec.x = -this.ball.vec.x
       let yreflectmod = this.ball.y - (this.leftPaddle.y + this.leftPaddle.length/2);
@@ -384,16 +385,11 @@ class Pong {
         yreflectmod = -2;
       }
       this.ball.vec.y = this.ball.vec.y + yreflectmod;
-      
-      //Hack to fix one stuck location
-      if(this.ball.y < 0){
-        this.ball.x +=10;
-        this.ball.y +=10;
-      }
     }
     
     if((this.ball.x > this.rightPaddle.x - this.ball.rad) && 
-       (this.ball.y > this.rightPaddle.y && this.ball.y < this.rightPaddle.y + this.rightPaddle.length)){
+       (this.ball.y > this.rightPaddle.y && this.ball.y < this.rightPaddle.y + this.rightPaddle.length) &&
+       this.ball.vec.x > 1){
       //bounce
       this.ball.vec.x = -this.ball.vec.x
       let yreflectmod = this.ball.y - (this.rightPaddle.y + this.rightPaddle.length/2);
