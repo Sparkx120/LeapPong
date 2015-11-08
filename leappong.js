@@ -158,6 +158,29 @@ class LeapController extends Controller{
 class AIController extends Controller{
   constructor(args){
     super(args);
+    this.ball   = args.ball;
+    this.paddle = args.paddle;
+    
+    this.interval = setInterval(()=>{
+      let top = this.paddle.y + this.paddle.length/2 - 25;
+      let bottom = this.paddle.y + this.paddle.length/2 + 25;
+      
+      if(top < this.ball.y){
+        //console.log("moving down");
+        this.direction = 1;
+        this.timestamp = Date.now();
+      }
+      if(bottom > this.ball.y){
+        //console.log("moving up");
+        this.direction = -1;
+        this.timestamp = Date.now();
+      }
+      
+      if(top > this.ball.y && bottom < this.ball.y){
+        this.direction = 0;
+        this.timestamp = Date.now();
+      }
+    },this.sampleFreq);
   }
 }
 
@@ -175,21 +198,24 @@ class Pong {
                                       rad:5,
                                       vec:{x:5,y:0},
                                       color:"rgba(0,0,0,1)"
-                            });
+                           });
     
     this.leftPaddle      = new Paddle({x:10,
                                        y:(canvas.height/2)-50,
                                        speed: 4,
                                        totalH: this.canvas.height
-                            });
+                           });
     
     this.rightPaddle     = new Paddle({x:canvas.width-10,
                                        y:(canvas.height/2)-50,
                                        speed: 4,
                                        totalH: this.canvas.height
-                            });
+                           });
     
-    this.leftController  = new AIController({sampleFreq: this.framerate});
+    this.leftController  = new AIController({sampleFreq: this.framerate,
+                                             ball: this.ball, 
+                                             paddle: this.leftPaddle
+                           });
     
     this.rightController = new LeapController({sampleFreq: this.framerate});
     
@@ -217,19 +243,25 @@ class Pong {
     if(this.ball.x < 0 + this.ball.rad){
       //right player loss
       this.ball.x = this.canvas.width/2;
+      this.ball.y = this.canvas.height/2;
+      this.ball.vec = {x:5,y:0}
     }
     
     if(this.ball.x > this.canvas.width - this.ball.rad){
       //left player loss
       this.ball.x = this.canvas.width/2;
+      this.ball.y = this.canvas.height/2;
+      this.ball.vec = {x:-5,y:0}
     }
     
     if(this.ball.y < 0 + this.ball.rad){
-      //bounce
+      //bounce mirror
+      this.ball.vec.y = -this.ball.vec.y;
     }
     
     if(this.ball.y > this.canvas.height - this.ball.rad){
-      //bounce
+      //bounce mirror
+      this.ball.vec.y = -this.ball.vec.y;
     }
     
     //Handle Paddle Collisions
@@ -237,12 +269,28 @@ class Pong {
        (this.ball.y > this.leftPaddle.y && this.ball.y < this.leftPaddle.y + this.leftPaddle.length)){
       //bounce
       this.ball.vec.x = -this.ball.vec.x
+      let yreflectmod = this.ball.y - (this.leftPaddle.y + this.leftPaddle.length/2);
+      if(yreflectmod > 2){ //Dumb angle calulation
+        yreflectmod = 2;
+      } 
+      if(yreflectmod < -2){
+        yreflectmod = -2;
+      }
+      this.ball.vec.y = this.ball.vec.y + yreflectmod; 
     }
     
     if((this.ball.x > this.rightPaddle.x - this.ball.rad) && 
        (this.ball.y > this.rightPaddle.y && this.ball.y < this.rightPaddle.y + this.rightPaddle.length)){
       //bounce
       this.ball.vec.x = -this.ball.vec.x
+      let yreflectmod = this.ball.y - (this.rightPaddle.y + this.rightPaddle.length/2);
+      if(yreflectmod > 2){ //Dumb angle calculation
+        yreflectmod = 2;
+      } 
+      if(yreflectmod < -2){
+        yreflectmod = -2;
+      }
+      this.ball.vec.y = this.ball.vec.y + yreflectmod; 
     }
     
     this.canvas.clear();
