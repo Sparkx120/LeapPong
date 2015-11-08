@@ -27,8 +27,8 @@ class Ball {
 
 class Paddle {
   constructor(args){
-    this.length    = 100;
-    this.width     = 5;
+    this.length    = 150;
+    this.width     = 10;
     this.x         = args.x;
     this.y         = args.y;
     this.totalH    = args.totalH;
@@ -171,7 +171,7 @@ class AIController extends Controller{
         this.timestamp = Date.now();
       }
       if(bottom > this.ball.y){
-        //console.log("moving up");
+        //console.log("moving usp");
         this.direction = -1;
         this.timestamp = Date.now();
       }
@@ -195,7 +195,7 @@ class Pong {
     
     this.ball            = new Ball({x:this.canvas.width/2,
                                       y:this.canvas.height/2,
-                                      rad:5,
+                                      rad:10,
                                       vec:{x:5,y:0},
                                       color:"rgba(0,0,0,1)"
                            });
@@ -206,7 +206,7 @@ class Pong {
                                        totalH: this.canvas.height
                            });
     
-    this.rightPaddle     = new Paddle({x:canvas.width-10,
+    this.rightPaddle     = new Paddle({x:canvas.width-20,
                                        y:(canvas.height/2)-50,
                                        speed: 4,
                                        totalH: this.canvas.height
