@@ -96,7 +96,9 @@ class Paddle {
 class Canvas {
   constructor(args){
     this.canvasElem = args.canvasElem;                   //The Canvas Element
-    this.ctx = args.canvasElem.getContext('2d');         //The 2D context
+    this.canvasB = document.createElement("canvas");     //Create a buffer canvas
+    this.ctx = this.canvasB.getContext('2d');         //The Buffered 2D context
+    this.ctxF = args.canvasElem.getContext('2d');        //The Final 2D context
     this.rect = this.canvasElem.getBoundingClientRect(); //The Rect
     this.width = this.rect.width;                        //Real pixel width
     this.height = this.rect.height;                      //Real pixel height
@@ -104,6 +106,10 @@ class Canvas {
     this.canvasElem.height = this.height;                //Set height
     this.canvasElem.style.width = this.width +"px";      //Force Real width;
     this.canvasElem.style.height = this.height + "px";   //Force Real height;
+    this.canvasB.width = this.width;                  //Set width
+    this.canvasB.height = this.height;                //Set height
+    this.canvasB.style.width = this.width +"px";      //Force Real width;
+    this.canvasB.style.height = this.height + "px";   //Force Real height;
     this.backgroundColor = args.backgroundColor;         //Set background Color
     this.forgroundColor = args.forgroundColor;           //Set forground Color
   }
@@ -139,6 +145,8 @@ class Canvas {
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0,0,this.width,this.height);
     this.ctx.drawImage(startImage, xpos, ypos, width, height);
+    
+    this.drawBuffer();
   }
   
   /**
@@ -159,6 +167,17 @@ class Canvas {
     this.ctx.moveTo(this.width/2,0);
     this.ctx.lineTo(this.width/2,this.height);
     this.ctx.stroke();
+    
+    this.drawBuffer();
+    
+  }
+  
+  drawBuffer(){
+    //Draw Buffer to Screen
+    this.ctxF.beginPath();
+    this.ctxF.fillStyle = this.backgroundColor;
+    this.ctxF.fillRect(0,0,this.width,this.height);
+    this.ctxF.drawImage(this.canvasB, 0, 0);
   }
 }
 
@@ -196,7 +215,6 @@ class KeyboardController extends Controller{
       var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
       if (charCode) {
         //Check for Up key
-        console.log(charCode);
         if(charCode == 87){ //'w'
           this.direction = -1;
           this.timestamp = Date.now();
@@ -249,7 +267,7 @@ class LeapController extends Controller{
                          this.timestamp = Date.now();
                         };
                         
-    let setHandDetected = (detected) => {this.handDetected = detected; console.log("hand detected")};
+    let setHandDetected = (detected) => {this.handDetected = detected;};
     
     //The Leap Motion controller loop function
     Leap.loop(controllerOptions, function(frame) {
@@ -509,6 +527,8 @@ class Pong {
     this.ball.drawable(this.canvas.ctx);
     this.leftPaddle.drawable(this.canvas.ctx);
     this.rightPaddle.drawable(this.canvas.ctx);
+    
+    this.canvas.drawBuffer();
     
     this.leftScore.innerHTML = this.leftScr;
     this.rightScore.innerHTML = this.rightScr;
